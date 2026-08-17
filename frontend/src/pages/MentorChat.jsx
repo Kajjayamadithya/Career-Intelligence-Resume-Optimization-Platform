@@ -30,8 +30,9 @@ const MentorChat = () => {
     try {
       setLoadingHistory(true);
       const res = await api.get('/chat/history');
-      if (res.data && res.data.success && res.data.data) {
-        setMessages(res.data.data.messages || []);
+      const chatPayload = res.data?.data || res.data?.chat;
+      if (chatPayload && Array.isArray(chatPayload.messages)) {
+        setMessages(chatPayload.messages);
       }
     } catch (err) {
       console.error(err);
@@ -59,9 +60,10 @@ const MentorChat = () => {
       setMessages((prev) => [...prev, { sender: 'user', text, createdAt: new Date() }]);
       
       const res = await api.post('/chat/message', { message: text });
-      if (res.data && res.data.success && res.data.data) {
+      const chatPayload = res.data?.data || res.data?.chat;
+      if (chatPayload && Array.isArray(chatPayload.messages)) {
         // Replace or reset message list with the complete list from the backend
-        setMessages(res.data.data.messages);
+        setMessages(chatPayload.messages);
       }
     } catch (err) {
       console.error(err);

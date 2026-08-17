@@ -32,10 +32,10 @@ class CareerService {
 
       const { roadmap } = response.data;
 
-      // 4. Enrich weekly learning topics with verified resources
+      // 4. Preserve RAG-enriched resources or fallback to catalog matcher
       if (roadmap && Array.isArray(roadmap.weeklyPlan)) {
         roadmap.weeklyPlan = roadmap.weeklyPlan.map(week => {
-          const resources = resourceService.enrichWeeklyTopic(
+          const resources = week.resources || resourceService.enrichWeeklyTopic(
             week.topic || '',
             week.objectives || []
           );

@@ -1,20 +1,15 @@
-import spacy
 import subprocess
 from typing import Set
 
 class KeywordExtractor:
     def __init__(self):
+        self.nlp = None
         # Gracefully load or download the spaCy English pipeline
         try:
+            import spacy
             self.nlp = spacy.load("en_core_web_sm")
-        except OSError:
-            try:
-                print("spaCy model 'en_core_web_sm' not found. Downloading...")
-                subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"], check=True)
-                self.nlp = spacy.load("en_core_web_sm")
-            except Exception as e:
-                print(f"Failed to auto-download spaCy pipeline, loading empty fallback: {str(e)}")
-                self.nlp = None
+        except Exception as e:
+            print(f"Notice: spaCy pipeline not loaded ({str(e)}). Using tech vocabulary matcher fallback.")
 
         # Comprehensive predefined list of modern software, AI/ML, and DevOps skills
         self.tech_vocabulary = {

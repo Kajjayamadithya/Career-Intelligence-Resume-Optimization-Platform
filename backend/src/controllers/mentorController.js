@@ -21,6 +21,7 @@ class MentorController {
       // Return the updated chat transcript
       res.status(200).json({
         success: true,
+        data: chat,
         chat
       });
     } catch (error) {
@@ -35,6 +36,7 @@ class MentorController {
 
       res.status(200).json({
         success: true,
+        data: chat,
         chat
       });
     } catch (error) {

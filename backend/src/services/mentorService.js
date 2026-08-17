@@ -16,9 +16,10 @@ class MentorService {
       chat = await CareerChat.create({ userId, messages: [] });
     }
 
-    // 2. Fetch user's latest resume skills for context enrichment
+    // 2. Fetch user's latest resume skills & data for RAG context enrichment
     const latestResume = await Resume.findOne({ userId, isLatest: true });
     const resumeSkills = latestResume?.normalizedData?.skills || [];
+    const resumeData = latestResume?.normalizedData || null;
 
     // 3. Format message history for Gemini (user vs model roles)
     // We only take the last 20 messages to keep request payloads clean and fast
@@ -35,12 +36,13 @@ class MentorService {
     });
     await chat.save();
 
-    // 5. Query FastAPI AI service
+    // 5. Query FastAPI AI service with RAG payload
     const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
     const payload = {
       message: userMessage,
       history: apiHistory,
-      resume_skills: resumeSkills
+      resume_skills: resumeSkills,
+      resume_data: resumeData
     };
 
     try {

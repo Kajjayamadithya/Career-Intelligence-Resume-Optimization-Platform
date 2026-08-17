@@ -47,6 +47,11 @@ class ChatMessageRequest(BaseModel):
     message: str = Field(..., description="User's chat input")
     history: List[Dict[str, str]] = Field(default=[], description="List of previous messages in history")
     resume_skills: List[str] = Field(default=[], description="User's resume skills")
+    resume_data: Optional[Dict[str, Any]] = Field(default=None, description="Candidate normalized resume payload for RAG vector search")
+
+class ResourceSearchRequest(BaseModel):
+    topic: str = Field(..., description="Learning topic string")
+    objectives: List[str] = Field(default=[], description="List of learning objectives")
 
 class InterviewQuestionsRequest(BaseModel):
     role: str = Field(..., description="Target job role")
@@ -123,7 +128,8 @@ def chat_message_route(payload: ChatMessageRequest):
         reply = gemini_service.chat_message(
             message=payload.message,
             history=payload.history,
-            resume_skills=payload.resume_skills
+            resume_skills=payload.resume_skills,
+            resume_data=payload.resume_data
         )
         return {
             "success": True,
@@ -131,6 +137,22 @@ def chat_message_route(payload: ChatMessageRequest):
         }
     except Exception as e:
         print(f"Error in /api/chat/message: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/rag/resources/search")
+def search_resources_route(payload: ResourceSearchRequest):
+    try:
+        from app.rag.resource_rag import resource_rag_engine
+        resource = resource_rag_engine.search_resources(
+            topic=payload.topic,
+            objectives=payload.objectives
+        )
+        return {
+            "success": True,
+            "resource": resource
+        }
+    except Exception as e:
+        print(f"Error in /api/rag/resources/search: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/interview/questions")
